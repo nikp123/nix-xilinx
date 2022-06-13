@@ -1,0 +1,157 @@
+= Xilinx for Nix users
+:source-highlighter: rouge
+
+This repo is a collection of files that should help Nix and NixOS users install
+Xilinx's software tools - Vivado & Vitis imperatively.
+
+== Install
+
+Like any other distro user, you should first go to your Xilinx account on at:
+https://www.xilinx.com/support/download.html and download the installation
+`.bin` file. To run this file, you'll need to make it an executable with `chmod
++x Xilinx*.bin` and enter into an FHS environment that a nix-shell will provide.
+
+=== Run `xilinx-shell` with stable Nix > 2.3
+
+....
+nix run gitlab:doronbehar/nix-xilinx#xilinx-shell
+....
+
+=== Run `xilinx-shell` with legacy Nix
+
+....
+git clone https://gitlab.com/doronbehar/nix-xilinx
+cd nix-xilinx
+nix-shell
+....
+
+=== Installation of vivado & vitis themselves
+
+From inside the FHS shell, follow the following steps:
+
+include::./install.adoc[]
+
+=== Adding `xilinx` executables to your system
+
+With what was done now, you run Matlab from the command line with:
+
+....
+# Legacy nix users (inside a clone of this repo)
+$(nix-build)/bin/xilinx
+# Flake nix users (without cloning)
+nix run gitlab:doronbehar/nix-xilinx
+....
+
+But it's likely you'd like to make the FHS environment survive garbage
+collections and add a desktop launcher to your system. To do that you can
+follow one of the following paths according to your setup.
+
+==== For NixOS users with a flakes setup
+
+[source,nix]
+----
+inputs = {
+  # ...
+  nix-xilinx = {
+    # Recommended if you also override the default nixpkgs flake, common among
+    # nixos-unstable users:
+    #inputs.nixpkgs.follows = "nixpkgs";
+    url = "gitlab:doronbehar/nix-xilinx";
+  };
+  # ...
+  outputs = { self, nixpkgs, nix-xilinx }:
+  let
+    flake-overlays = [
+      nix-xilinx.overlay
+    ];
+  in {
+    nixosConfigurations = (
+      HOSTNAME = nixpkgs.lib.nixosSystem {
+        modules = [ (import ./configuration.nix flake-overlays) ]
+      };
+    };
+  };
+};
+----
+
+And in `./configuration.nix`:
+
+
+[source,nix]
+----
+
+# All overlays given by flakes
+flake-overlays:
+
+{ config, pkgs, options, lib, ... }:
+{
+  nixpkgs.overlays = [
+    (
+      final: prev: {
+        # Your own overlays...
+      }
+    )
+  ] ++ flake-overlays;
+}
+----
+
+Example evaluated
+https://gitlab.com/doronbehar/nixos-configs/-/blob/e28b5aaf86f21202a2b7daa05b098ee5ed85de6f/flake.nix#L5-16[here]
+and
+https://gitlab.com/doronbehar/nixos-configs/-/blob/e28b5aaf86f21202a2b7daa05b098ee5ed85de6f/configuration.nix#L74[here].
+
+==== For NixOS users without a flakes setup
+
+The following setup should also fit flake NixOS users.
+
+Add to your `configration.nix` (untested, but should work):
+
+[source,nix]
+----
+  nixpkgs.overlays = let
+    nix-xilinx = import (builtins.fetchTarball "https://gitlab.com/doronbehar/nix-xilinx/-/archive/master/nix-xilinx-master.tar.gz");
+  in [
+    nix-xilinx.overlay
+    (
+      final: prev: {
+        # Your own overlays...
+      }
+    )
+  ];
+----
+
+==== Home Manager setup
+
+TODO
+
+==== Usage in Other Flakes / `shell.nix`
+
+Some people may wish to not install xilinx' tools globally, and only making it
+part of the `buildInputs` of their project. Usually this paradigm follows along
+with https://direnv.net/[`direnv`] +
+https://nixos.wiki/wiki/Development_environment_with_nix-shell#Using_Direnv[`shell.nix`]
+/ https://nixos.wiki/wiki/Flakes#Direnv_integration[`flake.nix`] setup. For
+example you can create in your project a `shell.nix`, or define `devShell` in
+your `flake.nix` similarly to this: 
+
+[source,nix]
+----
+{ pkgs, nix-xilinx }:
+
+pkgs.mkShell {
+  buildInputs = (with nix-xilinx.packages.x86_64-linux; [
+    vivado
+    vitis
+  ]);
+  # Define some probably useful environment variables
+  shellHook = nix-xilinx.shellHooksCommon;
+}
+----
+
+Note that xilinx' tools still need to be installed in a user-writeable location
+for this `shellHook` to work, as explained xref:#user-content-install[here].
+
+== Previous work / Credits
+
+This repository is mostly copy paste from
+nix-matlab[https://gitlab.com/doronbehar/nix-matlab].
