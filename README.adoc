@@ -6,7 +6,7 @@ Xilinx's software tools - Vivado & Vitis imperatively.
 
 == Install
 
-Like any other distro user, you should first go to your Xilinx account on at:
+Like any other distro user, you should first go to your Xilinx account at:
 https://www.xilinx.com/support/download.html and download the installation
 `.bin` file. To run this file, you'll need to make it an executable with `chmod
 +x Xilinx*.bin` and enter into an FHS environment that a nix-shell will provide.
@@ -17,32 +17,23 @@ https://www.xilinx.com/support/download.html and download the installation
 nix run gitlab:doronbehar/nix-xilinx#xilinx-shell
 ....
 
-=== Run `xilinx-shell` with legacy Nix
-
-....
-git clone https://gitlab.com/doronbehar/nix-xilinx
-cd nix-xilinx
-nix-shell
-....
-
 === Installation of vivado & vitis themselves
 
-From inside the FHS shell, follow the following steps:
+From inside the FHS shell, follow these steps:
 
 include::./install.adoc[]
 
-=== Adding `xilinx` executables to your system
+=== Adding the executables to your system
 
-With what was done now, you run Matlab from the command line with:
+With what was done now, you can run `vivado` / `vitis` from the command line with:
 
 ....
-# Legacy nix users (inside a clone of this repo)
-$(nix-build)/bin/xilinx
-# Flake nix users (without cloning)
-nix run gitlab:doronbehar/nix-xilinx
+nix run gitlab:doronbehar/nix-xilinx#vivado
 ....
 
-But it's likely you'd like to make the FHS environment survive garbage
+Use `nix search gitlab:doronbehar/nix-xilinx` to view all other packages defined.
+
+It's likely you'd like to make the FHS environment survive garbage
 collections and add a desktop launcher to your system. To do that you can
 follow one of the following paths according to your setup.
 
