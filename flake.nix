@@ -47,6 +47,18 @@
 
     createXilinxPkg = {product, meta}: let
       name = pkgs.lib.strings.toLower product;
+      desktopItem = pkgs.makeDesktopItem {
+        desktopName = product;
+        inherit name;
+        exec = "@out@/bin/${name}";
+        icon = name;
+        categories = [
+          "Utility"
+          "Development"
+          "IDE"
+        ];
+      };
+      xdg_icon_cmd_prefix = "env XDG_DATA_HOME=$out/share ${pkgs.xdg-utils}/bin/xdg-icon-resource install --novendor --size $size --mode user";
     in pkgs.buildFHSUserEnv {
       inherit name;
       inherit targetPkgs;
@@ -62,6 +74,19 @@
         fi
       '';
       inherit meta;
+      extraInstallCommands = ''
+        install -Dm644 ${desktopItem}/share/applications/${name}.desktop $out/share/applications/${name}.desktop
+        substituteInPlace $out/share/applications/${name}.desktop \
+          --replace "@out@" ${placeholder "out"}
+        for size in 64 256 512; do
+          ${{
+            vivado = "${xdg_icon_cmd_prefix} ${./icons/vivado.png} ${name}";
+            vitis_hls = "${xdg_icon_cmd_prefix} ${./icons/vitis_hls.png} ${name}";
+            vitis = "echo nix-xilinx warning: No icon is available for product ${product} >&2";
+            model_composer = "${xdg_icon_cmd_prefix} ${./icons/matlab.png} ${name}";
+          }.${name}}
+        done
+      '';
     };
   in {
     packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {

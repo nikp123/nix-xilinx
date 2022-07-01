@@ -26,7 +26,7 @@ pkgs:
   # For fetching project templates when creating projects
   gitMinimal
   # For the `arch` command
-  #toybox
+  toybox
 
   # to compile some xilinx examples
   opencl-clhpp
