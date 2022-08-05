@@ -145,4 +145,4 @@ for this `shellHook` to work, as explained xref:#user-content-install[here].
 == Previous work / Credits
 
 This repository is mostly copy paste from
-nix-matlab[https://gitlab.com/doronbehar/nix-matlab].
+https://gitlab.com/doronbehar/nix-matlab[nix-matlab].
