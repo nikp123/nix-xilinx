@@ -62,7 +62,7 @@
     in pkgs.buildFHSUserEnv {
       inherit name;
       inherit targetPkgs;
-      runScript = runScriptPrefix + ''
+      runScript = pkgs.writeScript "xilinx-${product}-runner" (runScriptPrefix + ''
         if [[ -d $INSTALL_DIR/${product}/$VERSION ]]; then
           $INSTALL_DIR/${product}/$VERSION/bin/${name} "$@"
         else
@@ -72,7 +72,7 @@
           echo have a correct '$VERSION' variable set in it - check that the '$VERSION' directory actually exists. >&2
           exit 1
         fi
-      '';
+      '');
       inherit meta;
       extraInstallCommands = ''
         install -Dm644 ${desktopItem}/share/applications/${name}.desktop $out/share/applications/${name}.desktop
@@ -92,7 +92,7 @@
     packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {
       name = "xilinx-shell";
       inherit targetPkgs;
-      runScript = ''
+      runScript = pkgs.writeScript "xilinx-shell-runner" ''
         cat <<EOF
         ============================
         welcome to nix-xilinx shell!
@@ -105,7 +105,7 @@
            executable available anywhere on your system.
         ============================
         EOF
-        bash
+        exec bash
       '';
       meta = metaCommon // {
         homepage = "https://gitlab.com/doronbehar/nix-xilinx";
