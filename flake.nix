@@ -34,7 +34,7 @@
       export XILINX_INSTALL_DIR="$INSTALL_DIR"
       unset INSTALL_DIR
       export XILINX_VERSION=$VERSION
-      unser VERSION
+      unset VERSION
     '';
     # Used in many packages
     metaCommon = with pkgs.lib; {
