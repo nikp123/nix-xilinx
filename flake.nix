@@ -13,10 +13,11 @@
     # supported
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     targetPkgs = import ./common.nix;
-    runScriptPrefix = ''
+    runScriptPrefix = {errorOut ? true}: ''
       # Search for an imperative declaration of the installation directory of xilinx
       if [[ -f ~/.config/xilinx/nix.sh ]]; then
         source ~/.config/xilinx/nix.sh
+    '' + pkgs.lib.optionalString errorOut ''else
       else
         echo "nix-xilinx: error: Did not find ~/.config/xilinx/nix.sh" >&2
         exit 1
@@ -24,12 +25,13 @@
       if [[ ! -d "$INSTALL_DIR" ]]; then
         echo "nix-xilinx: error: INSTALL_DIR $INSTALL_DIR isn't a directory" >&2
         exit 2
+    '' + ''
       fi
     '';
     # Might be useful for usage of this flake in another flake with devShell +
     # direnv setup. See:
     # https://gitlab.com/doronbehar/nix-matlab/-/merge_requests/1#note_631741222
-    shellHooksCommon = runScriptPrefix + ''
+    shellHooksCommon = (runScriptPrefix {}) + ''
       # Rename the variables for others to extend it in their shellHook
       export XILINX_INSTALL_DIR="$INSTALL_DIR"
       unset INSTALL_DIR
@@ -62,7 +64,7 @@
     in pkgs.buildFHSUserEnv {
       inherit name;
       inherit targetPkgs;
-      runScript = pkgs.writeScript "xilinx-${product}-runner" (runScriptPrefix + ''
+      runScript = pkgs.writeScript "xilinx-${product}-runner" ((runScriptPrefix {}) + ''
         if [[ -d $INSTALL_DIR/${product}/$VERSION ]]; then
           $INSTALL_DIR/${product}/$VERSION/bin/${name} "$@"
         else
@@ -92,7 +94,12 @@
     packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {
       name = "xilinx-shell";
       inherit targetPkgs;
-      runScript = pkgs.writeScript "xilinx-shell-runner" ''
+      runScript = pkgs.writeScript "xilinx-shell-runner" (
+        (runScriptPrefix {
+          # If the user hasn't setup a ~/.config/xilinx/nix.sh file yet, don't
+          # yell at them that it's missing
+          errorOut = false;
+        }) + ''
         cat <<EOF
         ============================
         welcome to nix-xilinx shell!
@@ -106,7 +113,7 @@
         ============================
         EOF
         exec bash
-      '';
+      '');
       meta = metaCommon // {
         homepage = "https://gitlab.com/doronbehar/nix-xilinx";
         description = "A bash shell from which you can install xilinx tools or launch them from CLI";
