@@ -17,7 +17,7 @@
       # Search for an imperative declaration of the installation directory of xilinx
       if [[ -f ~/.config/xilinx/nix.sh ]]; then
         source ~/.config/xilinx/nix.sh
-    '' + pkgs.lib.optionalString errorOut ''else
+    '' + pkgs.lib.optionalString errorOut ''
       else
         echo "nix-xilinx: error: Did not find ~/.config/xilinx/nix.sh" >&2
         exit 1
