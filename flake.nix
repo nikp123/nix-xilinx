@@ -137,8 +137,13 @@
       p.bc
       p.zlib
       p.zlib.dev
-      p.ncurses
-      p.ncurses.dev
+      p.ncurses5
+      p.ncurses5.dev
+      p.libxcrypt-legacy
+      # 
+      (p.libedit.override {
+        ncurses = p.ncurses5;
+      })
     ];
   in {
     packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {
