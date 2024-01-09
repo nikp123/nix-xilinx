@@ -275,6 +275,8 @@
         vitis
         vitis_hls
         model_composer
+        petalinux-install-shell
+        petalinux
       ;
     };
     inherit shellHooksCommon;
