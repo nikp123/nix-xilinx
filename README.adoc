@@ -1,37 +1,89 @@
-= Xilinx for Nix users
+= Xilinx & Petalinux for Nix users
 :source-highlighter: rouge
 
 This repo is a collection of files that should help Nix and NixOS users install
-Xilinx's software tools - Vivado & Vitis imperatively.
+Xilinx' software tools imperatively. The tools that were currently tested, are:
 
-== Install
+- Vivado
+- Vitis
+- Petalinux
 
-Like any other distro user, you should first go to your Xilinx account at:
-https://www.xilinx.com/support/download.html and download the installation
-`.bin` file. To run this file, you'll need to make it an executable with `chmod
-+x Xilinx*.bin` and enter into an FHS environment that a nix-shell will provide.
+== How does it work?
 
-=== Run `xilinx-shell` with stable Nix > 2.3
+The trick used to install and run all of Xilinx's tools is to use an _FHS_
+environment. These are documented in Nixpkgs' manual
+https://nixos.org/manual/nixpkgs/unstable/#sec-fhs-environments[here] (_FHS_
+means https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard[_Filesystem
+Hierarchy Standard]). This repository provides access to FHS shells with all
+the dependencies you need to install and run Xilinx' tools. After you finish
+installing Xilinx' tools from the FHS shell, you should be able to run them
+from the same FHS shell as well.
+
+This repository is structured as a Nix flake. Hence if you have Nix's `flakes`
+and `nix-command`
+https://nixos.org/manual/nix/unstable/contributing/experimental-features.html[`experimental-features`]
+enabled, you can view the packages this repo exposes using:
+
+....
+nix search gitlab:doronbehar/nix-xilinx
+....
+
+The packages ending with `-shell` suffix are the FHS shells described above.
+The other packages also rely upon the same FHS trick, but they provide
+executables that launch Xilinx' tools, using the installation paths you chose
+when installing the tools.
+
+We'll assume in the rest of the documentation that you have enabled `flakes`
+and `nix-command` experimental features. If you want to enable them
+temperarily, add to any of the below `nix` command the arguments: 
+
+....
+nix --option extra-experimental-features 'nix-command flakes' <other args>
+....
+
+=== Installing Vivado & Vitis
+
+First, download the desired tool from
+https://www.xilinx.com/support/download.html[here] - it should be a `.bin`
+file. Then enter into an FHS environment with:
 
 ....
 nix run gitlab:doronbehar/nix-xilinx#xilinx-shell
 ....
 
-=== Installation of vivado & vitis themselves
+And follow the steps below (also printed when you enter the shell):
 
-From inside the FHS shell, follow these steps:
+include::./install-gui-tools.adoc[]
 
-include::./install.adoc[]
+=== Installing Petalinux
 
-=== Adding the executables to your system
+Download the installer from
+https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html[here]
+- it should be a `.run` file. Then enter into an FHS environment with:
 
-With what was done now, you can run `vivado` / `vitis` from the command line with:
+....
+nix run gitlab:doronbehar/nix-xilinx#petalinux-install-shell
+....
+
+And follow the steps below (also printed when you enter the shell):
+
+include::./install-petalinux.adoc[]
+
+=== Adding the executables and `.desktop` files to your system
+
+Assuming the installations above went on successfully, you can run `vivado` /
+`vitis` from the command line with:
 
 ....
 nix run gitlab:doronbehar/nix-xilinx#vivado
 ....
 
-Use `nix search gitlab:doronbehar/nix-xilinx` to view all other packages defined.
+
+And you can run any of the `petalinux-..` tools using (e.g):
+
+....
+nix shell gitlab:doronbehar/nix-xilinx#petalinux --command petalinux-create
+....
 
 It's likely you'd like to make the FHS environment survive garbage
 collections and add a desktop launcher to your system. To do that you can
@@ -66,7 +118,6 @@ inputs = {
 ----
 
 And in `./configuration.nix`:
-
 
 [source,nix]
 ----
