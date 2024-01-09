@@ -217,7 +217,7 @@
       runScript = pkgs.writeShellScript "petalinux-wrapper" ((runScriptPrefix {
         petalinux = true;
       }) + ''
-        exec "$PETALINUX/tools/common/petalinux/bin/petalinux-$NIX_PETALINUX_TOOL"
+        exec "$PETALINUX/tools/common/petalinux/bin/petalinux-$NIX_PETALINUX_TOOL" "$@"
       '');
       extraInstallCommands = ''
         # Can't use nativeBuildInputs with buildFHSUserEnv
