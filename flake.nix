@@ -145,6 +145,26 @@
         ncurses = p.ncurses5;
       })
     ];
+    installShellMessage = toolStr: let
+      asciidocInstructionsFile = if toolStr == "petalinux" then
+        ./install-petalinux.adoc
+      else
+        ./install-gui-tools.adoc
+      ;
+    in ''
+      cat <<EOF
+      ============================
+      welcome to nix-xilinx ${toolStr} installation shell!
+
+      To install ${toolStr}:
+      ${nixpkgs.lib.strings.escape ["`" "'" "\"" "$"] (builtins.readFile asciidocInstructionsFile)}
+
+      Exit the shell with `exit`, and follow the rest of the instructions in the
+      README to make the installed executables available anywhere on your
+      system.
+      ============================
+      EOF
+    '';
   in {
     packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {
       name = "xilinx-shell";
@@ -154,19 +174,7 @@
           # If the user hasn't setup a ~/.config/xilinx/nix.sh file yet, don't
           # yell at them that it's missing
           errorOut = false;
-        }) + ''
-        cat <<EOF
-        ============================
-        welcome to nix-xilinx Vitis and Vivado installation shell!
-
-        To install vivado or vitis:
-        ${nixpkgs.lib.strings.escape ["`" "'" "\"" "$"] (builtins.readFile ./install.adoc)}
-
-        4. Finish the installation, and exit the shell (with \`exit\`).
-        5. Follow the rest of the instructions in the README to make xilinx
-           executable available anywhere on your system.
-        ============================
-        EOF
+        }) + (installShellMessage "Vivado & Vitis") + ''
         exec bash
       '');
       meta = metaCommon // {
@@ -183,22 +191,7 @@
           # If the user hasn't setup a ~/.config/xilinx/nix.sh file yet, don't
           # yell at them that it's missing
           errorOut = false;
-        }) + ''
-        cat <<EOF
-        ============================
-        welcome to nix-xilinx petalinux installation shell!
-
-        To install petalinux, find the downloaded installer script, and run:
-        
-            bash petalinux-*-installer.run --help 
-
-        Then, write into ~/.config/xilinx/nix.sh the installation directory you
-        chose with using the --dir argument.
-
-        Finally, Follow the rest of the instructions in the README to make the
-        petalinux executable available anywhere on your system.
-        ============================
-        EOF
+        }) + (installShellMessage "petalinux") + ''
         exec bash
       '');
       meta = metaCommon // {
