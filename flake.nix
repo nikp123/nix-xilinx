@@ -75,16 +75,6 @@
     '') + ''
       fi
     '';
-    # Might be useful for usage of this flake in another flake with devShell +
-    # direnv setup. See:
-    # https://gitlab.com/doronbehar/nix-matlab/-/merge_requests/1#note_631741222
-    shellHooksCommon = (runScriptPrefix {}) + ''
-      # Rename the variables for others to extend it in their shellHook
-      export XILINX_INSTALL_DIR="$INSTALL_DIR"
-      unset INSTALL_DIR
-      export XILINX_VERSION=$VERSION
-      unset VERSION
-    '';
     # Used in many packages
     metaCommon = with pkgs.lib; {
       # This license is not of Xilinx' tools, but for this repository
@@ -279,7 +269,18 @@
         petalinux
       ;
     };
-    inherit shellHooksCommon;
+    # Might be useful for usage of this flake in another flake with devShell +
+    # direnv setup. See:
+    # https://gitlab.com/doronbehar/nix-matlab/-/merge_requests/1#note_631741222
+    shellHooksCommon = (runScriptPrefix {}) + ''
+      # Rename the variables for others to extend it in their shellHook
+      export XILINX_INSTALL_DIR="$INSTALL_DIR"
+      unset INSTALL_DIR
+      export XILINX_VERSION=$VERSION
+      unset VERSION
+    '';
+    # If you want to do something a bit more custom
+    inherit runScriptPrefix;
     devShell.x86_64-linux = pkgs.mkShell {
       buildInputs = (guiTargetPkgs pkgs) ++ [
         self.packages.x86_64-linux.xilinx-shell
