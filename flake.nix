@@ -36,7 +36,7 @@
       # Search for an imperative declaration of the installation directory of ${toolName}
       if [[ -f ~/.config/xilinx/nix.sh ]]; then
         source ~/.config/xilinx/nix.sh
-    '' + (if errorOut then ''
+    '' + pkgs.lib.optionalString errorOut (''
       else
         echo "nix-xilinx: error: Did not find ~/.config/xilinx/nix.sh" >&2
         exit 1
@@ -44,10 +44,7 @@
       if [[ ! -d "''${${INSTALL_DIR_VAR}}" ]]; then
         echo "nix-xilinx: error: ${INSTALL_DIR_VAR} "''${${INSTALL_DIR_VAR}}" isn't a directory" >&2
         exit 2
-      fi
-    '' else (''
-      fi
-      if [[ -d "''${${INSTALL_DIR_VAR}}" ]]; then
+      else
         export ${INSTALL_DIR_VAR}
     '' + /*
 
@@ -75,9 +72,9 @@
         PATH="$XSCT_TOOLCHAIN/gnu/microblaze/lin/bin:$PATH"
         PATH="$PETALINUX/tools/xsct/petalinux/bin:$PETALINUX/tools/common/petalinux/bin:$PATH"
         "$PETALINUX/tools/common/petalinux/utils/petalinux-env-check"
-    '' + ''
+    '') + ''
       fi
-    ''));
+    '';
     # Used in many packages
     metaCommon = with pkgs.lib; {
       # This license is not of Xilinx' tools, but for this repository
