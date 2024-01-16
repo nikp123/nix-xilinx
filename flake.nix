@@ -130,7 +130,13 @@
         done
       '';
     };
-    petalinuxTargetPkgs = p: [
+    petalinuxTargetPkgs = p: let
+      ncurses5' = p.ncurses5.overrideAttrs (old: {
+        configureFlags = old.configureFlags ++ [ "--with-termlib" ];
+        postFixup = "";
+      });
+      ncurses5'-unicode = ncurses5'.override { unicodeSupport = false; };
+    in [
       p.autoconf
       p.automake
       p.gnumake
@@ -140,12 +146,18 @@
       p.bc
       p.zlib
       p.zlib.dev
-      p.ncurses5
-      p.ncurses5.dev
+      # https://github.com/NixOS/nixpkgs/issues/218534
+      # postFixup would create symlinks for the non-unicode version but since it breaks
+      # in buildFHSUserEnv, we just install both variants
+      ncurses5'
+      ncurses5'.dev
+      ncurses5'-unicode
+      ncurses5'-unicode.dev
+      p.stdenv.cc
       p.libxcrypt-legacy
       # 
       (p.libedit.override {
-        ncurses = p.ncurses5;
+        ncurses = ncurses5'-unicode;
       })
     ];
     installShellMessage = toolStr: let
