@@ -98,7 +98,7 @@
         ];
       };
       xdg_icon_cmd_prefix = "env XDG_DATA_HOME=$out/share ${pkgs.xdg-utils}/bin/xdg-icon-resource install --novendor --size $size --mode user";
-    in pkgs.buildFHSUserEnv {
+    in pkgs.buildFHSEnvChroot {
       inherit name;
       targetPkgs = guiTargetPkgs;
       runScript = pkgs.writeScript "xilinx-${product}-runner" ((runScriptPrefix {}) + ''
@@ -145,7 +145,7 @@
       p.zlib.dev
       # https://github.com/NixOS/nixpkgs/issues/218534
       # postFixup would create symlinks for the non-unicode version but since it breaks
-      # in buildFHSUserEnv, we just install both variants
+      # in buildFHSEnvChroot, we just install both variants
       ncurses5'
       ncurses5'.dev
       ncurses5'-unicode
@@ -178,7 +178,7 @@
       EOF
     '';
   in {
-    packages.x86_64-linux.xilinx-shell = pkgs.buildFHSUserEnv {
+    packages.x86_64-linux.xilinx-shell = pkgs.buildFHSEnvChroot {
       name = "xilinx-shell";
       targetPkgs = guiTargetPkgs;
       runScript = pkgs.writeScript "xilinx-shell-runner" (
@@ -194,7 +194,7 @@
         description = "A bash shell from which you can install xilinx tools or launch them from CLI";
       };
     };
-    packages.x86_64-linux.petalinux-install-shell = pkgs.buildFHSUserEnv {
+    packages.x86_64-linux.petalinux-install-shell = pkgs.buildFHSEnvChroot {
       name = "petalinux-install-shell";
       targetPkgs = petalinuxTargetPkgs;
       runScript = pkgs.writeScript "petalinux-install-shell-script" (
@@ -211,7 +211,7 @@
         description = "A bash shell from which you can install petalinux tools or launch them from CLI";
       };
     };
-    packages.x86_64-linux.petalinux = pkgs.buildFHSUserEnv {
+    packages.x86_64-linux.petalinux = pkgs.buildFHSEnvChroot {
       name = "petalinux";
       targetPkgs = petalinuxTargetPkgs;
       runScript = pkgs.writeShellScript "petalinux-wrapper" ((runScriptPrefix {
@@ -220,7 +220,7 @@
         exec "$PETALINUX/tools/common/petalinux/bin/petalinux-$NIX_PETALINUX_TOOL" "$@"
       '');
       extraInstallCommands = ''
-        # Can't use nativeBuildInputs with buildFHSUserEnv
+        # Can't use nativeBuildInputs with buildFHSEnvChroot
         source ${pkgs.makeWrapper}/nix-support/setup-hook
       '' + pkgs.lib.pipe [
         "boot" "build" "config" "create" "devtool" "package" "upgrade" "util"
