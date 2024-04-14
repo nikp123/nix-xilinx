@@ -8,6 +8,19 @@ Xilinx' software tools imperatively. The tools that were currently tested, are:
 - Vitis
 - Petalinux
 
+[WARNING]
+====
+Some programs included in the above products have been reported to be buggy,
+and even crash the GUI. It'd be great to get help in debugging this, but for
+now here is a list of known issues:
+
+- https://gitlab.com/doronbehar/nix-xilinx/-/issues/3[XSCT]
+- https://support.xilinx.com/s/question/0D54U00007tNuYnSAK/petalinux-fails-to-detect-my-gcc[`petalinux-build` issues]
+
+Using `petalinux-config` and `petalinux-create` should still work though.
+
+====
+
 == How does it work?
 
 The trick used to install and run all of Xilinx's tools is to use an _FHS_
