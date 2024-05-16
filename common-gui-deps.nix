@@ -5,6 +5,17 @@ pkgs:
 (with pkgs; [
   bash
   coreutils
+  # fool buildFHSEnvChroot to think we are not on an FHS environment. See also:
+  # https://unix.stackexchange.com/a/527763/135796
+  (writeTextFile {
+    name = "xilinx-fhs-etc_issue";
+    # Upstream doesn't officially support NixOS (unfortunately), so it
+    # doesn't matter really what we write here
+    text = ''
+      Welcome to NixOS (FHS environment for nix-xilinx)
+    '';
+    destination = "/etc/issue";
+  })
   zlib
   lsb-release
   stdenv.cc.cc
