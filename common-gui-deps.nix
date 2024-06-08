@@ -49,7 +49,10 @@ pkgs:
 
   # from installLibs.sh
   graphviz
-  gcc
+  # From some reason, without this lib.hiPrio, we don't get the crt1.o and
+  # crti.o files needed by those who don't simulations.. See:
+  # https://gitlab.com/doronbehar/nix-xilinx/-/issues/4
+  (lib.hiPrio gcc)
   unzip
   nettools
 ])
