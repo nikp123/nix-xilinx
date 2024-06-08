@@ -32,6 +32,8 @@ pkgs:
   freetype
   fontconfig
   glib
+  # For string.h, see https://gitlab.com/doronbehar/nix-xilinx/-/issues/4
+  glibc.dev
   gtk2
   gtk3
   libxcrypt-legacy
