@@ -288,6 +288,9 @@
       unset INSTALL_DIR
       export XILINX_VERSION=$VERSION
       unset VERSION
+
+      # https://adaptivesupport.amd.com/s/question/0D52E00006iHs04SAC/vivado-hangs-forever-with-white-window-during-startup-linux?language=en_US
+      export _JAVA_AWT_WM_NONREPARENTING=1
     '';
     # If you want to do something a bit more custom
     inherit runScriptPrefix;
@@ -302,6 +305,17 @@
       '';
     };
 
+    devShellFPGA = pkgs.mkShell {
+      buildInputs = 
+      # (guiTargetPkgs pkgs) ++ 
+      [
+        # self.packages.x86_64-linux.xilinx-shell
+        self.packages.x86_64-linux.vivado
+      ];
+      # From some reason using the attribute xilinx-shell directly as the
+      # devShell doesn't make it run like that by default.
+      shellHook = self.shellHooksCommon;
+    };
     defaultPackage.x86_64-linux = self.packages.x86_64-linux.xilinx-shell;
 
   };
