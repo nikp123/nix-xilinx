@@ -20,6 +20,7 @@ pkgs:
   lsb-release
   stdenv.cc.cc
   ncurses5
+  ncurses6
   xorg.libXext
   xorg.libX11
   xorg.libXrender

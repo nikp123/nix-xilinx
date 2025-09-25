@@ -102,10 +102,11 @@
       inherit name;
       targetPkgs = guiTargetPkgs;
       runScript = pkgs.writeScript "xilinx-${product}-runner" ((runScriptPrefix {}) + ''
-        if [[ -d $INSTALL_DIR/${product}/$VERSION ]]; then
-          $INSTALL_DIR/${product}/$VERSION/bin/${name} "$@"
+        if [[ -d $INSTALL_DIR/$VERSION/${product} ]]; then
+          LD_LIBRARY_PATH="/usr/lib"
+          $INSTALL_DIR/$VERSION/${product}/bin/${name} "$@"
         else
-          echo It seems ${product} isn\'t installed because '$INSTALL_DIR/${product}/$VERSION' doesn\'t exist. Follow >&2
+          echo It seems ${product} isn\'t installed because '$INSTALL_DIR/$VERSION/${product}' doesn\'t exist. Follow >&2
           echo the instructions in the README of nix-xilinx and make sure ${product} is selected during the >&2
           echo installation wizard. If it\'s supposed to be installed, check that your \~/.config/xilinx/nix.sh >&2
           echo have a correct '$VERSION' variable set in it - check that the '$VERSION' directory actually exists. >&2
@@ -128,11 +129,11 @@
       '';
     };
     petalinuxTargetPkgs = p: let
-      ncurses5' = p.ncurses5.overrideAttrs (old: {
+      ncurses6' = p.ncurses6.overrideAttrs (old: {
         configureFlags = old.configureFlags ++ [ "--with-termlib" ];
         postFixup = "";
       });
-      ncurses5'-unicode = ncurses5'.override { unicodeSupport = false; };
+      ncurses6'-unicode = ncurses6'.override { unicodeSupport = false; };
     in [
       p.autoconf
       p.automake
@@ -146,15 +147,15 @@
       # https://github.com/NixOS/nixpkgs/issues/218534
       # postFixup would create symlinks for the non-unicode version but since it breaks
       # in buildFHSEnvChroot, we just install both variants
-      ncurses5'
-      ncurses5'.dev
-      ncurses5'-unicode
-      ncurses5'-unicode.dev
+      ncurses6'
+      ncurses6'.dev
+      ncurses6'-unicode
+      ncurses6'-unicode.dev
       p.stdenv.cc
       p.libxcrypt-legacy
       # 
       (p.libedit.override {
-        ncurses = ncurses5'-unicode;
+        ncurses = ncurses6'-unicode;
       })
     ];
     installShellMessage = toolStr: let
